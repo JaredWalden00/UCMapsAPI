@@ -1,0 +1,6 @@
+@UCMapsAPI_HostAddress = http://localhost:5078
+
+GET {{UCMapsAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
