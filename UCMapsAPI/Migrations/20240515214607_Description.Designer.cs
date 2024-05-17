@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UCMapsAPI.Controllers;
 
@@ -10,9 +11,11 @@ using UCMapsAPI.Controllers;
 namespace UCMapsAPI.Migrations
 {
     [DbContext(typeof(SampleDBContext))]
-    partial class SampleDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240515214607_Description")]
+    partial class Description
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
