@@ -5,11 +5,11 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using UCMapsAPI.Controllers;
 using UCMapsAPI.Service;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -30,7 +30,19 @@ builder.Services.AddDbContext<SampleDBContext>(options => options.UseSqlServer(c
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
-        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                context.Response.OnStarting(async () =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                    logger.LogError("Authentication failed: " + context.Exception.Message);
+                });
+                return Task.CompletedTask;
+            }
+        };
+        options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value!)),
@@ -38,6 +50,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false
         };
     });
+
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -47,8 +61,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
-
+app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

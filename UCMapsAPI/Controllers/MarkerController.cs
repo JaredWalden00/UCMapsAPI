@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // Add this namespace for ToListAsync()
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims; // Add this namespace for ToListAsync()
 
 namespace UCMapsAPI.Controllers
 {
@@ -9,10 +10,15 @@ namespace UCMapsAPI.Controllers
     public class MarkerController : Controller
     {
         private readonly SampleDBContext _context;
-        public MarkerController(SampleDBContext context)
+        public IHttpContextAccessor _httpContextAccessor { get; }
+        public MarkerController(SampleDBContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
+
+        private int GetUserId() => int.Parse(_httpContextAccessor.HttpContext!.User
+        .FindFirstValue(ClaimTypes.NameIdentifier)!); //finds userId
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Marker>>> GetMarkers()
@@ -21,8 +27,10 @@ namespace UCMapsAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Marker>> PostMarkers(Marker marker)
         {
+            marker.User = await _context.Users.FirstOrDefaultAsync(u => u.Id == GetUserId());
             _context.Add(marker);
             await _context.SaveChangesAsync();
             var markerSuccess = await _context.Marker

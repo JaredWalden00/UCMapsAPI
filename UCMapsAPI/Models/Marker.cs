@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using UCMapsAPI.Models;
 
 namespace UCMapsAPI.Controllers
 {
@@ -14,5 +15,6 @@ namespace UCMapsAPI.Controllers
         public string Description { get; set; } = string.Empty;
         public double Lat { get; set; }
         public double Lng { get; set; }
+        public User? User { get; set; }
     }
 }
