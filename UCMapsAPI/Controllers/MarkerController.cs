@@ -23,7 +23,8 @@ namespace UCMapsAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Marker>>> GetMarkers()
         {
-            return Ok(await _context.Marker.ToListAsync());
+            var markers = await _context.Marker.Include(m => m.User).ToListAsync();
+            return Ok(markers);
         }
 
         [HttpPost]

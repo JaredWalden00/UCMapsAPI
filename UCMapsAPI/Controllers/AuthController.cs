@@ -19,7 +19,7 @@ namespace UCMapsAPI.Controllers
         public async Task<ActionResult<ServiceResponse<int>>> Register([FromBody] UserRegisterDto request)
         {
             var response = await _authRepo.Register(
-                new User { Username = request.Username }, request.Password
+                new User { Username = request.Username, Email = request.Email }, request.Password
             );
             if (!response.Success)
             {

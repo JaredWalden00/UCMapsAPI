@@ -42,7 +42,7 @@ namespace UCMapsAPI.Service
         public async Task<ServiceResponse<int>> Register(User user, string password)
         {
             var response = new ServiceResponse<int>();
-            if (await UserExists(user.Username))
+            if (await UserExists(user.Username, user.Email))
             {
                 response.Success = false;
                 response.Message = "User Already exists.";
@@ -59,7 +59,7 @@ namespace UCMapsAPI.Service
             return response;
         }
 
-        public async Task<bool> UserExists(string username)
+        public async Task<bool> UserExists(string username, string email)
         {
             if (await _context.Users.AnyAsync(u => u.Username.ToLower() == username.ToLower()))
             {
