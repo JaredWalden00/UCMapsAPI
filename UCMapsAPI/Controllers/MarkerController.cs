@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims; // Add this namespace for ToListAsync()
+using UCMapsAPI.Models.DTO;
+using UCMapsAPI.Models;
 
 namespace UCMapsAPI.Controllers
 {
@@ -51,6 +53,57 @@ namespace UCMapsAPI.Controllers
                 await _context.SaveChangesAsync();
             }
             return Ok(markerSuccess);
+        }
+
+        [HttpPost("{id}/vote")]
+        public async Task<IActionResult> Vote(int id, [FromBody] bool voteDto)
+        {
+            var marker = await _context.Marker.FindAsync(id);
+            if (marker == null)
+            {
+                return NotFound();
+            }
+
+            var userId = GetUserId();
+
+            var existingVote = await _context.Votes
+                .FirstOrDefaultAsync(v => v.MarkerId == id && v.UserId == userId);
+
+            if (existingVote != null)
+            {
+                return BadRequest("User has already voted for this marker.");
+            }
+
+            var vote = new Vote
+            {
+                MarkerId = id,
+                UserId = userId,
+                IsStillThere = voteDto
+            };
+
+            _context.Votes.Add(vote);
+
+            if (voteDto)
+            {
+                marker.StillThereCount++;
+            }
+            else
+            {
+                marker.NotThereCount++;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(marker);
+        }
+
+        [HttpGet("{id}/user-vote-status")]
+        public async Task<IActionResult> GetUserVoteStatus(int id, [FromQuery] string userId)
+        {
+            var hasVoted = await _context.Votes
+                .AnyAsync(v => v.MarkerId == id && v.UserId.ToString() == userId);
+
+            return Ok(hasVoted);
         }
     }
 }

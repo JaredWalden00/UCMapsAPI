@@ -17,6 +17,7 @@ namespace UCMapsAPI.Controllers
         }
         public virtual DbSet<Marker> Marker { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Vote> Votes { get; set; }
         public DbSet<TokenInfo> TokenInfo { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +25,23 @@ namespace UCMapsAPI.Controllers
             {
                 entity.HasKey(k => k.Id);
             });
+            OnModelCreatingPartial(modelBuilder);
+
+            modelBuilder.Entity<Vote>(entity =>
+            {
+                entity.HasKey(v => v.Id);
+                entity.HasIndex(v => new { v.MarkerId, v.UserId }).IsUnique(); // Ensure unique vote per user per marker
+
+                // Configure relationships
+                entity.HasOne(v => v.Marker)
+                      .WithMany(m => m.Votes)
+                      .HasForeignKey(v => v.MarkerId);
+
+                entity.HasOne(v => v.User)
+                      .WithMany()
+                      .HasForeignKey(v => v.UserId);
+            });
+
             OnModelCreatingPartial(modelBuilder);
         }
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
