@@ -90,7 +90,8 @@ namespace UCMapsAPI.Service
         {
             var claims = new List<Claim>{
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Actor, user.IsAdmin.ToString())
             };
 
             var appSettingsToken = _configuration.GetSection("AppSettings:Token").Value;

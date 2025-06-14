@@ -24,7 +24,9 @@ builder.Services.AddSwaggerGen(c => {
 
     c.OperationFilter<SecurityRequirementsOperationFilter>();
 });
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+System.Diagnostics.Debug.WriteLine(connectionString);
 builder.Services.AddDbContext<SampleDBContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -56,6 +58,10 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseCors(builder =>
+    builder.AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader());
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
